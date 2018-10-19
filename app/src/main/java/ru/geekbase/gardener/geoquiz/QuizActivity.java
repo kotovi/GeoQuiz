@@ -6,11 +6,23 @@ import android.os.Bundle;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 public class QuizActivity extends AppCompatActivity {
     private Button mTrueButton;
     private Button mFalseButton;
+    private Button mNextButton;
+    private TextView mQuestionTextViev;
+    private Question[] mQuestionBank = new Question[]{
+            new Question(R.string.question_africa, true),
+            new Question(R.string.question_americas, true),
+            new Question(R.string.question_australia,  false),
+            new Question(R.string.question_mideast, false),
+            new Question(R.string.question_oceans, true),
+            new Question(R.string.question_russia, true)
+    };
+    private int mCurrentIndex = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
