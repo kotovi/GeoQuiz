@@ -3,6 +3,7 @@ package ru.geekbase.gardener.geoquiz;
 import android.gesture.Gesture;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
@@ -13,8 +14,10 @@ import android.widget.Toast;
 public class QuizActivity extends AppCompatActivity {
     private Button mTrueButton;
     private Button mFalseButton;
+    private Button mNextButton;
     private ImageButton mResumeImageButton;
     private ImageButton mNextImageButton;
+    private static String Tag = "ActivityQuiz";
 
     private TextView mQuestionTextViev;
     private Question[] mQuestionBank = new Question[]{
@@ -29,7 +32,33 @@ public class QuizActivity extends AppCompatActivity {
     private int mCurrentIndex = 0;
 
     @Override
+    public void onStart() {
+        super.onStart();
+        Log.d(Tag, "onStart() called");
+    }
+    @Override
+    public void onResume() {
+        super.onResume();
+        Log.d(Tag, "onResume() called");
+    }
+    @Override
+    public void onPause() {
+        super.onPause();
+        Log.d(Tag, "onPause() called");
+    }
+    @Override
+    public void onStop() {
+        super.onStop();
+        Log.d(Tag, "onStop() called");
+    }
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        Log.d(Tag, "onDestroy() called");
+    }
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Log.d(Tag,"onCreate(Bundle savedInstanceState)");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_quiz);
 
@@ -40,6 +69,16 @@ public class QuizActivity extends AppCompatActivity {
             public void onClick(View v) {
                 mCurrentIndex = (mCurrentIndex + 1) % mQuestionBank.length;
                 updateQuestion();
+            }
+        });
+
+        mNextButton = (Button) findViewById(R.id.next_button);
+        mNextButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mCurrentIndex = (mCurrentIndex + 1) % mQuestionBank.length;
+                updateQuestion();
+
             }
         });
 
