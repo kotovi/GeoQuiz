@@ -17,7 +17,9 @@ public class QuizActivity extends AppCompatActivity {
     private Button mNextButton;
     private ImageButton mResumeImageButton;
     private ImageButton mNextImageButton;
+
     private static String Tag = "ActivityQuiz";
+    private static final String KEY_INDEX = "index";
 
     private TextView mQuestionTextViev;
     private Question[] mQuestionBank = new Question[]{
@@ -30,6 +32,12 @@ public class QuizActivity extends AppCompatActivity {
     };
 
     private int mCurrentIndex = 0;
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState){
+        super.onSaveInstanceState(savedInstanceState);
+        Log.i(Tag, "onSaveInstanceState");
+        savedInstanceState.putInt(KEY_INDEX, mCurrentIndex);
+    }
 
     @Override
     public void onStart() {
@@ -48,6 +56,7 @@ public class QuizActivity extends AppCompatActivity {
     }
     @Override
     public void onStop() {
+
         super.onStop();
         Log.d(Tag, "onStop() called");
     }
@@ -61,6 +70,9 @@ public class QuizActivity extends AppCompatActivity {
         Log.d(Tag,"onCreate(Bundle savedInstanceState)");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_quiz);
+        if (savedInstanceState!=null) {
+          mCurrentIndex = savedInstanceState.getInt(KEY_INDEX,0);
+        }
 
         mQuestionTextViev = (TextView) findViewById(R.id.question_text_view);
 
@@ -72,15 +84,7 @@ public class QuizActivity extends AppCompatActivity {
             }
         });
 
-        mNextButton = (Button) findViewById(R.id.next_button);
-        mNextButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mCurrentIndex = (mCurrentIndex + 1) % mQuestionBank.length;
-                updateQuestion();
 
-            }
-        });
 
         mTrueButton = (Button) findViewById(R.id.true_button);
         mTrueButton.setOnClickListener(new View.OnClickListener() {
