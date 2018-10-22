@@ -19,9 +19,13 @@ public class QuizActivity extends AppCompatActivity {
     private ImageButton mNextImageButton;
 
     private static String Tag = "ActivityQuiz";
+    private static final String KEY_INDEX_ANSWERS_ARRAY = "index_answers_Array";
     private static final String KEY_INDEX = "index";
+    private static final String SCORE_INDEX ="score";
 
     private TextView mQuestionTextViev;
+    private TextView mScoreTextView;
+
     private Question[] mQuestionBank = new Question[]{
             new Question(R.string.question_africa, true),
             new Question(R.string.question_americas, true),
@@ -31,13 +35,24 @@ public class QuizActivity extends AppCompatActivity {
             new Question(R.string.question_russia, true)
     };
 
+    //попробуем реализовать блокировку уже отвеченных вопросов
+    int mQuestionBankLeng = mQuestionBank.length;
+    boolean [] AnsweredQuestion = new boolean[mQuestionBankLeng];
+
     private int mCurrentIndex = 0;
+    private int score = 0;
+
+
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState){
         super.onSaveInstanceState(savedInstanceState);
         Log.i(Tag, "onSaveInstanceState");
         savedInstanceState.putInt(KEY_INDEX, mCurrentIndex);
+        savedInstanceState.putBooleanArray(KEY_INDEX_ANSWERS_ARRAY, AnsweredQuestion);
+        savedInstanceState.putInt(SCORE_INDEX,score);
     }
+
+
 
     @Override
     public void onStart() {
@@ -72,9 +87,15 @@ public class QuizActivity extends AppCompatActivity {
         setContentView(R.layout.activity_quiz);
         if (savedInstanceState!=null) {
           mCurrentIndex = savedInstanceState.getInt(KEY_INDEX,0);
+          AnsweredQuestion = savedInstanceState.getBooleanArray(KEY_INDEX_ANSWERS_ARRAY);
+          score = savedInstanceState.getInt(SCORE_INDEX,0);
+          showScore();
+
         }
 
         mQuestionTextViev = (TextView) findViewById(R.id.question_text_view);
+
+
 
         mQuestionTextViev.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -130,14 +151,32 @@ public class QuizActivity extends AppCompatActivity {
         mQuestionTextViev.setText(question);
     }
 
+
+    private void showScore() {
+        mScoreTextView = (TextView) findViewById(R.id.score);
+        mScoreTextView.setText(String.valueOf(score));
+
+    }
+
     private void checkAnswer (boolean userPressedTrue) {
         boolean answerIsTrue = mQuestionBank[mCurrentIndex].isAnswerTrue();
-        int messageResId = 0;
-        if (userPressedTrue == answerIsTrue) {
-            messageResId = R.string.correct_toast;
-        } else {
-            messageResId = R.string.incorrect_toast;
+        if (AnsweredQuestion[mCurrentIndex] == true){
+            Toast.makeText(this, "На данный вопрос уже дан ответ!", Toast.LENGTH_SHORT).show();
+        }  else {
+            AnsweredQuestion[mCurrentIndex] = true;
+            int messageResId = 0;
+            if (userPressedTrue == answerIsTrue) {
+                score = score + 10;
+                messageResId = R.string.correct_toast;
+            } else {
+                messageResId = R.string.incorrect_toast;
+            }
+            showScore();
+            Toast.makeText(this, messageResId, Toast.LENGTH_SHORT).show();
         }
-        Toast.makeText(this, messageResId, Toast.LENGTH_SHORT).show();
+
+
     }
+
+
 }
