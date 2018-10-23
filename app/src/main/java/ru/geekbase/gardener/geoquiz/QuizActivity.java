@@ -26,6 +26,7 @@ public class QuizActivity extends AppCompatActivity {
     private static final String KEY_INDEX = "index";
     private static final String SCORE_INDEX ="score";
     private static final String KEY_CHEATER = "cheaterKey";
+    private static final String KEY_CHEATED_QUESTIONS="index_cheatered_questions";
     private static final int REQUEST_CODE_CHEAT = 0;
 
     private TextView mQuestionTextViev;
@@ -43,6 +44,7 @@ public class QuizActivity extends AppCompatActivity {
     //попробуем реализовать блокировку уже отвеченных вопросов
     int mQuestionBankLeng = mQuestionBank.length;
     boolean [] AnsweredQuestion = new boolean[mQuestionBankLeng];
+    boolean [] cheatedQuestion = new boolean[mQuestionBankLeng];
 
     private int mCurrentIndex = 0;
     private int score = 0;
@@ -57,6 +59,7 @@ public class QuizActivity extends AppCompatActivity {
         savedInstanceState.putBooleanArray(KEY_INDEX_ANSWERS_ARRAY, AnsweredQuestion);
         savedInstanceState.putInt(SCORE_INDEX,score);
         savedInstanceState.putBoolean(KEY_CHEATER,mIsCheater);
+        savedInstanceState.putBooleanArray(KEY_CHEATED_QUESTIONS,cheatedQuestion);
     }
 
 
@@ -97,6 +100,7 @@ public class QuizActivity extends AppCompatActivity {
           AnsweredQuestion = savedInstanceState.getBooleanArray(KEY_INDEX_ANSWERS_ARRAY);
           score = savedInstanceState.getInt(SCORE_INDEX,0);
           mIsCheater = savedInstanceState.getBoolean(KEY_CHEATER,false);
+          cheatedQuestion = savedInstanceState.getBooleanArray(KEY_CHEATED_QUESTIONS);
           showScore();
         }
         //
@@ -190,10 +194,14 @@ public class QuizActivity extends AppCompatActivity {
     private void checkAnswer (boolean userPressedTrue) {
         boolean answerIsTrue = mQuestionBank[mCurrentIndex].isAnswerTrue();
         int messageResId = 0;
-
+         if (cheatedQuestion[mCurrentIndex]) mIsCheater =true;
         if (AnsweredQuestion[mCurrentIndex]) { messageResId=R.string.already_answered; }
             else {
-                if (mIsCheater) { messageResId = R.string.judgment_toast; }
+                if (mIsCheater) {
+                    messageResId = R.string.judgment_toast;
+                    cheatedQuestion[mCurrentIndex] = true;
+
+                }
             else {
 
                 if (userPressedTrue == answerIsTrue) {
