@@ -1,5 +1,7 @@
 package ru.geekbase.gardener.geoquiz;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.gesture.Gesture;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -15,6 +17,7 @@ public class QuizActivity extends AppCompatActivity {
     private Button mTrueButton;
     private Button mFalseButton;
     private Button mNextButton;
+    private Button mCheatButton;
     private ImageButton mResumeImageButton;
     private ImageButton mNextImageButton;
 
@@ -22,6 +25,8 @@ public class QuizActivity extends AppCompatActivity {
     private static final String KEY_INDEX_ANSWERS_ARRAY = "index_answers_Array";
     private static final String KEY_INDEX = "index";
     private static final String SCORE_INDEX ="score";
+    private static final String KEY_CHEATER = "cheaterKey";
+    private static final int REQUEST_CODE_CHEAT = 0;
 
     private TextView mQuestionTextViev;
     private TextView mScoreTextView;
@@ -41,6 +46,7 @@ public class QuizActivity extends AppCompatActivity {
 
     private int mCurrentIndex = 0;
     private int score = 0;
+    private boolean mIsCheater = false;
 
 
     @Override
@@ -50,6 +56,7 @@ public class QuizActivity extends AppCompatActivity {
         savedInstanceState.putInt(KEY_INDEX, mCurrentIndex);
         savedInstanceState.putBooleanArray(KEY_INDEX_ANSWERS_ARRAY, AnsweredQuestion);
         savedInstanceState.putInt(SCORE_INDEX,score);
+        savedInstanceState.putBoolean(KEY_CHEATER,mIsCheater);
     }
 
 
@@ -89,14 +96,11 @@ public class QuizActivity extends AppCompatActivity {
           mCurrentIndex = savedInstanceState.getInt(KEY_INDEX,0);
           AnsweredQuestion = savedInstanceState.getBooleanArray(KEY_INDEX_ANSWERS_ARRAY);
           score = savedInstanceState.getInt(SCORE_INDEX,0);
+          mIsCheater = savedInstanceState.getBoolean(KEY_CHEATER,false);
           showScore();
-
         }
-
+        //
         mQuestionTextViev = (TextView) findViewById(R.id.question_text_view);
-
-
-
         mQuestionTextViev.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -104,9 +108,7 @@ public class QuizActivity extends AppCompatActivity {
                 updateQuestion();
             }
         });
-
-
-
+        //
         mTrueButton = (Button) findViewById(R.id.true_button);
         mTrueButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -114,6 +116,7 @@ public class QuizActivity extends AppCompatActivity {
                 checkAnswer(true);
             }
         });
+        //
         mFalseButton = (Button) findViewById(R.id.false_button);
         mFalseButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -122,9 +125,20 @@ public class QuizActivity extends AppCompatActivity {
 
             }
         });
+        //
+        mCheatButton = (Button) findViewById(R.id.cheat_button);
+        mCheatButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //Intent intent = new Intent(QuizActivity.this, CheatActivity.class);
+                Boolean answerIsTrue = mQuestionBank[mCurrentIndex].isAnswerTrue();
+                Intent intent =CheatActivity.newIntent(QuizActivity.this, answerIsTrue);
+                //startActivity(intent);
+                startActivityForResult(intent, REQUEST_CODE_CHEAT);
+            }
+        });
 
-
-
+        //
         mResumeImageButton = (ImageButton) findViewById(R.id.resume_image_button);
         mResumeImageButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -133,17 +147,32 @@ public class QuizActivity extends AppCompatActivity {
                 updateQuestion();
             }
         });
-
+        //
         mNextImageButton = (ImageButton) findViewById(R.id.next_image_button);
         mNextImageButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 mCurrentIndex = (mCurrentIndex + 1) % mQuestionBank.length;
+                mIsCheater = false;
                 updateQuestion();
             }
         });
 
         updateQuestion();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data){
+        if (resultCode != Activity.RESULT_OK){
+            return;
+        }
+        if (requestCode == REQUEST_CODE_CHEAT){
+            if (data==null){
+                return;
+            }
+            mIsCheater = CheatActivity.wasAnswerShown(data);
+        }
+
     }
 
     private void updateQuestion() {
@@ -160,23 +189,28 @@ public class QuizActivity extends AppCompatActivity {
 
     private void checkAnswer (boolean userPressedTrue) {
         boolean answerIsTrue = mQuestionBank[mCurrentIndex].isAnswerTrue();
-        if (AnsweredQuestion[mCurrentIndex] == true){
-            Toast.makeText(this, "На данный вопрос уже дан ответ!", Toast.LENGTH_SHORT).show();
-        }  else {
-            AnsweredQuestion[mCurrentIndex] = true;
-            int messageResId = 0;
-            if (userPressedTrue == answerIsTrue) {
-                score = score + 10;
-                messageResId = R.string.correct_toast;
-            } else {
-                messageResId = R.string.incorrect_toast;
+        int messageResId = 0;
+
+        if (AnsweredQuestion[mCurrentIndex]) { messageResId=R.string.already_answered; }
+            else {
+                if (mIsCheater) { messageResId = R.string.judgment_toast; }
+            else {
+
+                if (userPressedTrue == answerIsTrue) {
+                    score = score + 10;
+                    AnsweredQuestion[mCurrentIndex] = true;
+                    messageResId = R.string.correct_toast;
+                    } else {
+                      AnsweredQuestion[mCurrentIndex] = true;
+                      messageResId = R.string.incorrect_toast;
+                      }
             }
+        }
             showScore();
             Toast.makeText(this, messageResId, Toast.LENGTH_SHORT).show();
         }
 
 
-    }
 
 
 }
