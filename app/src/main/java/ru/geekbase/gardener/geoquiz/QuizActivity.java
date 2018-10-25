@@ -1,5 +1,7 @@
 package ru.geekbase.gardener.geoquiz;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.app.Activity;
 import android.content.Intent;
 import android.gesture.Gesture;
@@ -8,6 +10,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
+import android.view.ViewAnimationUtils;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
@@ -214,8 +217,9 @@ public class QuizActivity extends AppCompatActivity {
                       }
             }
         }
+
             showScore();
-            Toast.makeText(this, messageResId, Toast.LENGTH_SHORT).show();
+
         }
 
 
